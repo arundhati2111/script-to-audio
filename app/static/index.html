@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Prompt → Script Generator</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <main class="wrap">
+    <header>
+      <h1>Prompt → Script Generator</h1>
+      <p class="sub">Describe your idea. Get a complete script with characters, dialogue, and emotions.</p>
+      <p id="mode-badge" class="badge hidden"></p>
+    </header>
+
+    <form id="form" class="card">
+      <label for="prompt">Your prompt</label>
+      <textarea id="prompt" rows="4" placeholder="e.g. A lighthouse keeper finds a message in a bottle from the future..." required></textarea>
+
+      <div class="row">
+        <div class="field">
+          <label for="duration">Duration (minutes)</label>
+          <input id="duration" type="number" min="0.5" step="0.5" placeholder="auto" />
+          <small>Leave blank to let the engine decide.</small>
+        </div>
+        <div class="field">
+          <label for="genre">Genre / tone</label>
+          <input id="genre" type="text" placeholder="optional (e.g. thriller)" />
+        </div>
+        <div class="field">
+          <label for="language">Language</label>
+          <input id="language" type="text" value="English" />
+        </div>
+      </div>
+
+      <button id="submit" type="submit">Generate script</button>
+    </form>
+
+    <section id="status" class="status hidden"></section>
+
+    <section id="result" class="hidden">
+      <div class="tabs">
+        <button class="tab active" data-view="screenplay">Screenplay</button>
+        <button class="tab" data-view="structured">Structured</button>
+      </div>
+      <div id="view-screenplay" class="view"><pre id="screenplay"></pre></div>
+      <div id="view-structured" class="view hidden"></div>
+    </section>
+  </main>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>

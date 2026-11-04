@@ -1,24 +1,28 @@
-# Prompt → Script Generator
+# Prompt → Audio Drama Script Generator
 
-Give a short prompt, get back a complete, structured script/story: title, logline,
-characters (with motivations, emotional arcs, and voice profiles), and scenes broken
-into actions and emotion-tagged dialogue. You can set a target duration, or let the
-engine pick a sensible length for you.
+Give a short prompt, get back a complete script written **for an audio drama**: a
+narrator, a cast of characters each with a distinct machine-usable voice, emotion-tagged
+dialogue (with intensity), and sound cues. The output also includes a flat, ordered
+**audio timeline** — the exact sequence of narration, dialogue, and sound events — so a
+downstream text-to-speech + mixing stage can render it into audio with different speakers
+and emotions.
 
-This is **step one** of a larger pipeline — the structured output is designed to be
-consumed by later stages (for example, turning the script into audio).
+This is **step one** of a larger pipeline: prompt → script → audio drama.
 
 ## Features
 
-- **Prompt-driven generation** — one idea in, a full script out.
-- **Structured output** — strongly-typed JSON (characters, scenes, dialogue, emotions)
-  plus a human-readable screenplay view.
-- **Duration control** — pass `duration_minutes`, or the engine infers it from the prompt
-  and scales the number of scenes and dialogue accordingly.
-- **Pluggable LLM** — works with any OpenAI-compatible API (OpenAI, OpenRouter, Groq,
-  local Ollama, etc.).
-- **Mock mode** — runs with no API key for instant local testing with a deterministic
-  sample script.
+- **Prompt-driven generation** — one idea in, a full audio-drama script out.
+- **Audio-first structure** — a narrator voices action/setting (nothing is "shown"),
+  every character has a structured voice, and sound design (ambience + SFX) is first-class.
+- **Voice casting data** — each speaker carries gender, age range, pitch, pace, accent,
+  timbre, and a base emotion, so each maps cleanly onto a distinct TTS voice.
+- **Controlled emotions** — dialogue uses a fixed emotion vocabulary plus a 0.0–1.0
+  intensity, which maps reliably onto TTS/SSML speaking styles.
+- **Audio timeline** — a flat, ordered list of utterances (narration/dialogue/sound) with
+  resolved speaker + emotion, ready for rendering.
+- **Duration control** — pass `duration_minutes`, or the engine infers and scales the script.
+- **Pluggable LLM** — any OpenAI-compatible API (OpenAI, OpenRouter, Groq, local Ollama).
+- **Mock mode** — runs with no API key for instant local testing.
 
 ## Requirements
 
@@ -67,8 +71,19 @@ Request body:
 - `genre` (optional) — tone hint (free text or a known genre).
 - `language` (optional, default `English`).
 
-Response: a `script` object (structured), a `screenplay_text` string (formatted), and
-`mode` (`"llm"` or `"mock"`).
+Response:
+- `script` — the structured audio drama. Key fields:
+  - `narrator` — `{ id, name, style, voice }`
+  - `characters[]` — each with `id`, `name`, `role`, `description`, `motivation`,
+    `emotional_arc`, and a structured `voice`
+  - `scenes[]` — each with `heading`, `mood`, `ambience`, and ordered `elements`
+    (`narration` / `dialogue` / `sound`)
+  - `timeline[]` — the flat, ordered list of `Utterance`s for the audio renderer
+- `screenplay_text` — a human-readable rendering of the script.
+- `mode` — `"llm"` or `"mock"`.
+
+Each dialogue `Utterance` in `timeline` carries `speaker_id`, `speaker_name`, `emotion`,
+`intensity`, and `text` — everything the TTS stage needs, with no scene-walking required.
 
 Interactive API docs are available at http://localhost:8000/docs.
 
@@ -89,14 +104,17 @@ All configuration is via environment variables (see `.env.example`):
 app/
   __init__.py
   config.py       # env-based settings
-  models.py       # Pydantic models (the script data contract)
+  models.py       # Pydantic models (the audio-drama data contract)
   generator.py    # duration inference, prompt building, LLM call, mock fallback
-  formatter.py    # structured script -> readable screenplay
+  timeline.py     # flatten scenes -> ordered audio timeline (resolves speakers)
+  formatter.py    # structured script -> readable audio-drama script
   main.py         # FastAPI app + routes
-  static/         # web UI
+  static/         # web UI (Script / Cast & Scenes / Audio Timeline views)
 ```
 
 ## Roadmap
 
-This generator is the foundation. Planned next steps for the larger project include
-voice casting per character and text-to-speech rendering of the dialogue.
+This generator is step one. The next stage consumes `script.timeline`: cast each
+`speaker_id` to a concrete TTS voice (using the `voice` profiles), synthesize each
+utterance with its `emotion`/`intensity`, render the `sound` cues and scene `ambience`,
+and mix everything into a finished audio drama.

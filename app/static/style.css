@@ -88,6 +88,15 @@ pre#screenplay {
 .line .who { font-weight: 700; }
 .line .emo { color: var(--accent); font-size: 0.8rem; }
 .action-el { color: var(--muted); font-style: italic; margin: 8px 0; }
+.sfx { color: #f0b36b; font-size: 0.85rem; margin: 6px 0; font-family: ui-monospace, Menlo, monospace; }
+
+table.tl { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+table.tl th, table.tl td { text-align: left; padding: 7px 8px; border-bottom: 1px solid var(--border); vertical-align: top; }
+table.tl th { color: var(--muted); font-weight: 600; position: sticky; top: 0; background: var(--card); }
+table.tl td:nth-child(1), table.tl td:nth-child(2) { color: var(--muted); }
+.tl-narration { background: rgba(110,168,254,0.05); }
+.tl-sound td { color: #f0b36b; }
+.tl-dialogue .who { color: var(--text); }
 
 .hidden { display: none; }
 

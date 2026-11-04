@@ -9,8 +9,8 @@
 <body>
   <main class="wrap">
     <header>
-      <h1>Prompt → Script Generator</h1>
-      <p class="sub">Describe your idea. Get a complete script with characters, dialogue, and emotions.</p>
+      <h1>Prompt → Audio Drama Script</h1>
+      <p class="sub">Describe your idea. Get a complete audio-drama script: narrator, cast with distinct voices, emotion-tagged dialogue, and sound cues — ready for text-to-speech.</p>
       <p id="mode-badge" class="badge hidden"></p>
     </header>
 
@@ -41,11 +41,13 @@
 
     <section id="result" class="hidden">
       <div class="tabs">
-        <button class="tab active" data-view="screenplay">Screenplay</button>
-        <button class="tab" data-view="structured">Structured</button>
+        <button class="tab active" data-view="screenplay">Script</button>
+        <button class="tab" data-view="structured">Cast &amp; Scenes</button>
+        <button class="tab" data-view="timeline">Audio Timeline</button>
       </div>
       <div id="view-screenplay" class="view"><pre id="screenplay"></pre></div>
       <div id="view-structured" class="view hidden"></div>
+      <div id="view-timeline" class="view hidden"></div>
     </section>
   </main>
 

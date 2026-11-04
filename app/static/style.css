@@ -101,3 +101,25 @@ table.tl td:nth-child(1), table.tl td:nth-child(2) { color: var(--muted); }
 .hidden { display: none; }
 
 @media (max-width: 680px) { .row { grid-template-columns: 1fr; } }
+
+/* ---- Audio panel ---- */
+.audio-panel { margin-bottom: 18px; }
+.audio-head { display: flex; justify-content: space-between; align-items: center; gap: 14px; flex-wrap: wrap; }
+.audio-head small { display: block; color: var(--muted); font-size: 0.78rem; max-width: 420px; }
+.audio-controls { display: flex; gap: 10px; align-items: center; }
+.audio-controls select {
+  background: var(--card-2); color: var(--text); border: 1px solid var(--border);
+  border-radius: 10px; padding: 10px 12px; font-size: 0.9rem;
+}
+#audio-btn {
+  padding: 10px 16px; border: none; border-radius: 10px; font-weight: 700; color: white; cursor: pointer;
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
+}
+#audio-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+#audio-progress { display: flex; align-items: center; gap: 12px; color: var(--muted); font-size: 0.85rem; }
+#audio-progress.error { color: #ff8a8a; }
+#audio-bar { flex: 1; height: 8px; }
+#audio-result { display: flex; flex-direction: column; gap: 8px; }
+#audio-player { width: 100%; }
+#audio-download { color: var(--accent); font-size: 0.85rem; }
+tr.playing td { background: rgba(110, 168, 254, 0.18); }

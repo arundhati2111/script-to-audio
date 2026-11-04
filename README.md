@@ -112,9 +112,38 @@ app/
   static/         # web UI (Script / Cast & Scenes / Audio Timeline views)
 ```
 
+## Audio drama rendering
+
+After generating a script, click **Generate audio** in the UI (or call the API). The
+renderer consumes `script.timeline`:
+
+1. **Casting** - every speaker gets a different voice, matched on gender, accent and age.
+2. **Acting** - each line is voiced with its `emotion` and `intensity`.
+   - `openai` engine: emotion, voice traits and delivery notes are sent as acting
+     instructions to `gpt-4o-mini-tts` (real emotional performance).
+   - `edge` engine (free, no key): emotion is expressed through rate, pitch and volume,
+     so it is more subtle.
+3. **Mixing** - characters are panned across the stereo field, loudness is balanced per
+   line, pauses are timed from punctuation and directions, scene ambience beds and sound
+   effects are synthesized locally and layered in, and the result is exported as MP3.
+
+Requires `ffmpeg` on the PATH.
+
+### API
+
+- `POST /audio` - body `{ "script": <Script>, "provider": "edge|openai|mock" (optional), "ambience": true }`.
+  Returns `202` with a job (`id`, `status`, `progress`).
+- `GET /audio/{id}` - job status. When `done` it includes `audio_url`, `duration_seconds`,
+  the voice `cast`, and per-line `segments` (start/end seconds).
+- `GET /audio/{id}/file` - the MP3.
+
+Jobs are kept in memory and files are written to `AUDIO_OUTPUT_DIR`.
+
+Audio settings: `TTS_PROVIDER`, `TTS_API_KEY`, `TTS_BASE_URL`, `TTS_MODEL`, `TTS_TIMEOUT`,
+`TTS_CONCURRENCY`, `AUDIO_OUTPUT_DIR` (see `.env.example`).
+
 ## Roadmap
 
-This generator is step one. The next stage consumes `script.timeline`: cast each
-`speaker_id` to a concrete TTS voice (using the `voice` profiles), synthesize each
-utterance with its `emotion`/`intensity`, render the `sound` cues and scene `ambience`,
-and mix everything into a finished audio drama.
+- Swap the synthesized ambience/SFX for a real sound-effect library.
+- Music beds and stingers between scenes.
+- Persist jobs across restarts.

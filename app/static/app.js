@@ -93,7 +93,7 @@ function renderTimeline(script) {
     const content = u.kind === "sound" && u.sound_cue
       ? `<em>${esc(u.sound_cue.cue_type)}: ${esc(u.sound_cue.description)}</em>`
       : esc(u.text);
-    html += `<tr class="tl-${esc(u.kind)}">
+    html += `<tr class="tl-${esc(u.kind)}" data-index="${u.index}">
       <td>${u.index}</td><td>${u.scene_number}</td><td>${esc(u.kind)}</td>
       <td>${esc(u.speaker_name)}</td><td>${emo}</td><td>${content}</td>
     </tr>`;
@@ -101,6 +101,74 @@ function renderTimeline(script) {
   html += `</tbody></table>`;
   timelineView.innerHTML = html;
 }
+
+// ---------- Audio drama generation ----------
+const audioBtn = document.getElementById("audio-btn");
+const audioProvider = document.getElementById("audio-provider");
+const audioProgress = document.getElementById("audio-progress");
+const audioBar = document.getElementById("audio-bar");
+const audioMsg = document.getElementById("audio-msg");
+const audioResult = document.getElementById("audio-result");
+const audioPlayer = document.getElementById("audio-player");
+const audioDownload = document.getElementById("audio-download");
+const audioCast = document.getElementById("audio-cast");
+
+let currentScript = null;
+let segments = [];
+
+audioBtn.addEventListener("click", async () => {
+  if (!currentScript) return;
+  audioBtn.disabled = true;
+  hide(audioResult);
+  show(audioProgress);
+  audioBar.value = 0;
+  audioMsg.textContent = "Starting…";
+  try {
+    const res = await fetch("/audio", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ script: currentScript, provider: audioProvider.value || null }),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.detail || `Request failed (${res.status})`);
+    }
+    let job = await res.json();
+    while (job.status === "queued" || job.status === "running") {
+      audioBar.value = job.progress;
+      audioMsg.textContent = job.message;
+      await new Promise((r) => setTimeout(r, 1000));
+      const poll = await fetch(`/audio/${job.id}`);
+      if (!poll.ok) throw new Error(`Lost audio job (${poll.status})`);
+      job = await poll.json();
+    }
+    if (job.status === "error") throw new Error(job.message);
+
+    hide(audioProgress);
+    audioPlayer.src = job.audio_url;
+    audioDownload.href = job.audio_url;
+    segments = job.segments;
+    audioCast.textContent = "Cast: " + job.cast.map((c) => `${c.speaker_name} → ${c.voice}`).join(" · ")
+      + ` · ${job.duration_seconds}s · engine: ${job.provider}`;
+    show(audioResult);
+  } catch (err) {
+    audioMsg.textContent = "Audio error: " + err.message;
+    audioProgress.classList.add("error");
+    show(audioProgress);
+  } finally {
+    audioBtn.disabled = false;
+  }
+});
+
+// Highlight the timeline row that is currently being spoken.
+audioPlayer.addEventListener("timeupdate", () => {
+  const t = audioPlayer.currentTime;
+  const seg = segments.find((s) => t >= s.start && t <= s.end);
+  document.querySelectorAll("#view-timeline tr.playing").forEach((r) => r.classList.remove("playing"));
+  if (seg) {
+    document.querySelector(`#view-timeline tr[data-index="${seg.index}"]`)?.classList.add("playing");
+  }
+});
 
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
@@ -134,6 +202,13 @@ form.addEventListener("submit", async (e) => {
     screenplayEl.textContent = data.screenplay_text;
     renderStructured(data.script);
     renderTimeline(data.script);
+
+    currentScript = data.script;
+    segments = [];
+    audioPlayer.removeAttribute("src");
+    hide(audioResult);
+    hide(audioProgress);
+    audioProgress.classList.remove("error");
 
     modeBadge.textContent = data.mode === "mock"
       ? "MOCK MODE — set LLM_API_KEY in .env for real AI generation"

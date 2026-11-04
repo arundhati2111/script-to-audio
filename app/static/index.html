@@ -40,6 +40,33 @@
     <section id="status" class="status hidden"></section>
 
     <section id="result" class="hidden">
+      <div id="audio-panel" class="card audio-panel">
+        <div class="audio-head">
+          <div>
+            <strong>Audio drama</strong>
+            <small id="audio-note">Voices each character with their own voice and emotion, then mixes in ambience and sound effects.</small>
+          </div>
+          <div class="audio-controls">
+            <select id="audio-provider" aria-label="Voice engine">
+              <option value="">Default engine</option>
+              <option value="edge">Edge (free)</option>
+              <option value="openai">OpenAI (best emotion)</option>
+              <option value="mock">Mock tones (test)</option>
+            </select>
+            <button id="audio-btn" type="button">Generate audio</button>
+          </div>
+        </div>
+        <div id="audio-progress" class="hidden" role="status" aria-live="polite">
+          <progress id="audio-bar" max="1" value="0"></progress>
+          <span id="audio-msg"></span>
+        </div>
+        <div id="audio-result" class="hidden">
+          <audio id="audio-player" controls preload="auto"></audio>
+          <a id="audio-download" href="#" download>Download MP3</a>
+          <p id="audio-cast" class="meta"></p>
+        </div>
+      </div>
+
       <div class="tabs">
         <button class="tab active" data-view="screenplay">Script</button>
         <button class="tab" data-view="structured">Cast &amp; Scenes</button>

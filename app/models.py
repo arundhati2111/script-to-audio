@@ -192,6 +192,41 @@ class Script(BaseModel):
     )
 
 
+# ---------- Audio rendering ----------
+
+class AudioRequest(BaseModel):
+    script: Script
+    provider: Optional[str] = Field(
+        default=None, description="'openai', 'edge' or 'mock'. Defaults to the server configuration."
+    )
+    ambience: bool = Field(default=True, description="Mix in scene ambience beds and sound effects.")
+
+
+class CastEntry(BaseModel):
+    speaker_id: str
+    speaker_name: str
+    voice: str
+    pan: float = Field(description="Stereo position, -1.0 (left) to 1.0 (right).")
+
+
+class Segment(BaseModel):
+    index: int
+    start: float
+    end: float
+
+
+class AudioJob(BaseModel):
+    id: str
+    status: str = Field(description="'queued', 'running', 'done' or 'error'.")
+    provider: str
+    progress: float = Field(default=0.0, ge=0.0, le=1.0)
+    message: str = ""
+    duration_seconds: Optional[float] = None
+    audio_url: Optional[str] = None
+    cast: List[CastEntry] = Field(default_factory=list)
+    segments: List[Segment] = Field(default_factory=list)
+
+
 class GenerateResponse(BaseModel):
     script: Script
     screenplay_text: str = Field(..., description="Human-readable audio-drama script.")
